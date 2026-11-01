@@ -1,0 +1,42 @@
+[
+  {
+    "url": "https://groww.in/mutual-funds/amc/hdfc-mutual-funds",
+    "scheme": "HDFC Mutual Fund - AMC Overview",
+    "filename": "mutual-funds_amc_hdfc-mutual-funds.html",
+    "fetched_at": "2026-11-01T11:31:17.114594Z",
+    "status_code": 200,
+    "content_hash": "74d9fddd03858d616d475e9d10a0d55694ae2300ba3c58fc6af4e955581b0e55"
+  },
+  {
+    "url": "https://groww.in/mutual-funds/hdfc-large-cap-fund-direct-growth",
+    "scheme": "HDFC Large Cap Fund Direct Growth",
+    "filename": "mutual-funds_hdfc-large-cap-fund-direct-growth.html",
+    "fetched_at": "2026-11-01T11:31:17.849708Z",
+    "status_code": 200,
+    "content_hash": "e9650ee9874d0a494204924a45c1bdc34d95c860437cfeb34ae0005a6d822f25"
+  },
+  {
+    "url": "https://groww.in/mutual-funds/hdfc-equity-fund-direct-growth",
+    "scheme": "HDFC Flexi Cap Direct Plan Growth",
+    "filename": "mutual-funds_hdfc-equity-fund-direct-growth.html",
+    "fetched_at": "2026-11-01T11:31:18.415567Z",
+    "status_code": 200,
+    "content_hash": "fd337b287c561b861fbaf81dac05134ca1a607fc7f1608c938fffa5e3edc365b"
+  },
+  {
+    "url": "https://groww.in/mutual-funds/hdfc-elss-tax-saver-fund-direct-plan-growth",
+    "scheme": "HDFC ELSS Tax Saver Fund Direct Plan Growth",
+    "filename": "mutual-funds_hdfc-elss-tax-saver-fund-direct-plan-growth.html",
+    "fetched_at": "2026-11-01T11:31:18.974538Z",
+    "status_code": 200,
+    "content_hash": "3403cab509709106b37f582470f9438449c313d635e595f02e316f43db2acd22"
+  },
+  {
+    "url": "https://groww.in/mutual-funds/hdfc-mid-cap-fund-direct-growth",
+    "scheme": "HDFC Mid Cap Fund Direct Growth",
+    "filename": "mutual-funds_hdfc-mid-cap-fund-direct-growth.html",
+    "fetched_at": "2026-11-01T11:31:19.585824Z",
+    "status_code": 200,
+    "content_hash": "a716f8bed67096b0ddf271b3a859673f93ec260b09cf050f3e6ebc14a08e03fb"
+  }
+]
