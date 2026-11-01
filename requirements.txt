@@ -1,0 +1,14 @@
+streamlit
+requests
+beautifulsoup4
+PyYAML
+sentence-transformers
+chromadb
+groq
+python-dotenv
+pandas
+numpy
+huggingface-hub
+transformers
+tokenizers
+torch
