@@ -26,7 +26,7 @@ class Retriever:
         persist_dir = os.path.join(BASE_DIR, vconf.get('persist_dir', 'data/vectorstore'))
         self.client = chromadb.PersistentClient(path=persist_dir)
         self.collection = self.client.get_or_create_collection(vconf.get('collection_name', 'groww_mf_faq'))
-        self.top_k = rconf.get('top_k', 4)
+        self.top_k = rconf.get('top_k', 6)
     
     def retrieve(self, query, top_k=None):
         if top_k is None:
@@ -46,11 +46,16 @@ class Retriever:
                 'scheme_name': metas[i].get('scheme_name') if metas[i] else None,
                 'distance': dists[i] if i < len(dists) else None
             })
+        # Prefer results matching scheme names mentioned in query
+        ql = query.lower()
+        scheme_keywords = ['large cap', 'flexi cap', 'mid cap', 'elss', 'tax saver']
+        for sk in scheme_keywords:
+            if sk in ql:
+                # boost matching
+                matched = [r for r in results if r.get('scheme_name') and sk.replace(' ','-') in r['scheme_name'].lower() or sk in r['scheme_name'].lower()]
+                if matched:
+                    # put matched first
+                    others = [r for r in results if r not in matched]
+                    results = matched + others
+                break
         return results
-
-
-if __name__ == '__main__':
-    r = Retriever()
-    out = r.retrieve("What is expense ratio of HDFC Large Cap Fund?")
-    for o in out:
-        print(o['source_url'], o['scheme_name'])

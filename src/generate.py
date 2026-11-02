@@ -46,36 +46,61 @@ class Generator:
                 'source_url': 'https://groww.in/mutual-funds/amc/hdfc-mutual-funds',
                 'refused': True
             }
-        context = "\n\n".join([r['text'] for r in results])
+        # Filter to results from the most relevant scheme based on query
+        ql = query.lower()
+        if 'large cap' in ql and 'hdfc' in ql:
+            filtered = [r for r in results if r.get('source_url') == 'https://groww.in/mutual-funds/hdfc-large-cap-fund-direct-growth']
+            if filtered:
+                results = filtered + [r for r in results if r not in filtered]
+        elif 'mid cap' in ql and 'hdfc' in ql:
+            filtered = [r for r in results if r.get('source_url') == 'https://groww.in/mutual-funds/hdfc-mid-cap-fund-direct-growth']
+            if filtered:
+                results = filtered + [r for r in results if r not in filtered]
+        elif ('flexi cap' in ql or 'equity fund' in ql) and 'hdfc' in ql:
+            filtered = [r for r in results if r.get('source_url') == 'https://groww.in/mutual-funds/hdfc-equity-fund-direct-growth']
+            if filtered:
+                results = filtered + [r for r in results if r not in filtered]
+        elif ('elss' in ql or 'tax saver' in ql) and 'hdfc' in ql:
+            filtered = [r for r in results if r.get('source_url') == 'https://groww.in/mutual-funds/hdfc-elss-tax-saver-fund-direct-plan-growth']
+            if filtered:
+                results = filtered + [r for r in results if r not in filtered]
+        
+        context = "\n\n".join([r['text'] for r in results[:6]])
         source_url = results[0]['source_url']
         system = """You are a facts-only FAQ assistant for HDFC Mutual Fund schemes from official public pages.
 Rules:
 - Answer ONLY using the provided context. Do not use prior knowledge.
 - If the answer is not clearly supported by context, say you don't have that exact fact in the indexed sources.
-- Keep answer <= 3 sentences.
+- Keep answer <= 2 sentences.
+- Give the exact factual answer (e.g., expense ratio percentage, lock-in years, SIP amount, exit load).
 - Every answer must include exactly one source link (use the provided source_url).
 - Do not give advice, recommendations, opinions, or comparisons.
 - Do not compute or claim returns/performance.
 - Do not ask for or store PII.
 - Be concise and factual."""
-        user = f"Context:\n{context}\n\nQuestion: {query}\n\nSource URL: {source_url}\n\nAnswer in <= 3 sentences, cite only this source_url, and append 'Last updated from sources: {datetime.now().strftime('%Y-%m-%d')}'"
+        user = f"Context:\n{context}\n\nQuestion: {query}\n\nSource URL: {source_url}\n\nAnswer with the exact fact in <= 2 sentences. Cite only this source_url. Append 'Last updated from sources: {datetime.now().strftime('%Y-%m-%d')}'"
         try:
             if not self.client:
-                # Fallback without LLM - simple extractive style
-                ans = results[0]['text'][:400].strip() + '...'
-                return {
-                    'answer': f"{ans}\n\nLast updated from sources: {datetime.now().strftime('%Y-%m-%d')}",
-                    'source_url': source_url,
-                    'refused': False
-                }
+                # Try to extract exact fact
+                for r in results:
+                    t = r['text'].lower()
+                    if 'expense ratio' in query.lower() and 'expense ratio' in t:
+                        # find percentage
+                        import re
+                        m = re.search(r'expense ratio[^0-9]*([0-9]+\.?[0-9]*)\s*%', r['text'], re.I)
+                        if m:
+                            ans = f"The expense ratio of {r.get('scheme_name','the scheme')} is {m.group(1)}%."
+                            return {'answer': f"{ans}\nSource: {r['source_url']}\nLast updated from sources: {datetime.now().strftime('%Y-%m-%d')}", 'source_url': r['source_url'], 'refused': False}
+                ans = results[0]['text'][:250].strip()
+                return {'answer': f"{ans}\n\nLast updated from sources: {datetime.now().strftime('%Y-%m-%d')}", 'source_url': source_url, 'refused': False}
             resp = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system},
                     {"role": "user", "content": user}
                 ],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
+                temperature=0.0,
+                max_tokens=150
             )
             ans = resp.choices[0].message.content.strip()
             return {
@@ -84,9 +109,13 @@ Rules:
                 'refused': False
             }
         except Exception as e:
-            ans = results[0]['text'][:300].strip() + '...'
-            return {
-                'answer': f"{ans}\n\nLast updated from sources: {datetime.now().strftime('%Y-%m-%d')}",
-                'source_url': source_url,
-                'refused': False
-            }
+            for r in results:
+                t = r['text'].lower()
+                if 'expense ratio' in query.lower() and 'expense ratio' in t:
+                    import re
+                    m = re.search(r'expense ratio[^0-9]*([0-9]+\.?[0-9]*)\s*%', r['text'], re.I)
+                    if m:
+                        ans = f"The expense ratio of {r.get('scheme_name','the scheme')} is {m.group(1)}%."
+                        return {'answer': f"{ans}\nSource: {r['source_url']}\nLast updated from sources: {datetime.now().strftime('%Y-%m-%d')}", 'source_url': r['source_url'], 'refused': False}
+            ans = results[0]['text'][:200].strip()
+            return {'answer': f"{ans}\n\nLast updated from sources: {datetime.now().strftime('%Y-%m-%d')}", 'source_url': source_url, 'refused': False}
